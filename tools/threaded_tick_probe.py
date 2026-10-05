@@ -123,14 +123,14 @@ time.sleep(1.0)
 candidates = [
     ("stock_control", "2327"),
     ("otc_control", "6488"),
-    ("future_candidate", "PBF10"),
-    ("future_candidate", "PBF"),
-    ("future_candidate", "QEF10"),
-    ("future_candidate", "QEF"),
-    ("future_candidate", "TXF"),
-    ("future_candidate", "MXF"),
-    ("future_candidate", "TMF"),
-    ("future_candidate", "TM0000"),
+    ("future_oct26", "PBFV6"),
+    ("future_oct26", "QEFV6"),
+    ("future_oct26", "OWFV6"),
+    ("future_oct26", "LXFV6"),
+    ("future_nov26", "PBFX6"),
+    ("future_nov26", "QEFX6"),
+    ("future_numeric_control", "PBF10"),
+    ("future_numeric_control", "QEF10"),
 ]
 
 results = []
