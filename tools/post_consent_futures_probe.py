@@ -70,7 +70,7 @@ for m in [2,3,7,13]:
 
 time.sleep(1)
 
-symbols=["TX00","TMF00","PBF00","QEF00","QFF00","OWF00","LXF00","6488"]
+symbols=["TX00","TM0000","PBF00","QEF00","QFF00","OWF00","LXF00","6488"]
 results=[]
 def req(item,sym):
     try:
