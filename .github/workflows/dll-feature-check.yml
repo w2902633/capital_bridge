@@ -1,0 +1,29 @@
+name: Capital DLL Feature Check
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/dll_feature_check.py"
+      - ".github/workflows/dll-feature-check.yml"
+
+jobs:
+  check:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show SKCOM file version
+        shell: powershell
+        run: |
+          $dll = "C:\Capital\SKDLLPythonTester\libs\SKCOM.dll"
+          $v = (Get-Item $dll).VersionInfo
+          Write-Host "FileVersion=$($v.FileVersion)"
+          Write-Host "ProductVersion=$($v.ProductVersion)"
+
+      - name: Check exported functions
+        shell: powershell
+        run: |
+          python tools/dll_feature_check.py
