@@ -61,9 +61,10 @@ for m in [2,3,7,13]:
         for needle in ["TX00","MTX00","TMF","PBF","QEF","OWF","LXF","QFF","國巨","環球晶"]:
             if needle in raw: hits.append(needle)
         print("[STOCKLIST_HITS]",m,hits,flush=True)
-        if "TMF" in raw:
-            p0=raw.find("TMF")
-            print("[TMF_CONTEXT]",repr(raw[max(0,p0-120):p0+500]),flush=True)
+        for key in ["TMF","微型","微台","微臺"]:
+            if key in raw:
+                p0=raw.find(key)
+                print("[MICRO_CONTEXT]",key,repr(raw[max(0,p0-160):p0+650]),flush=True)
     except Exception as e:
         print("[STOCKLIST_EXC]",m,type(e).__name__,repr(e),flush=True)
 
