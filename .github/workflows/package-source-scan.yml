@@ -1,0 +1,17 @@
+name: Capital Package Source Scan
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/package_source_scan.py"
+      - ".github/workflows/package-source-scan.yml"
+jobs:
+  scan:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - shell: powershell
+        run: |
+          $env:PYTHONIOENCODING = "utf-8"
+          python tools/package_source_scan.py
