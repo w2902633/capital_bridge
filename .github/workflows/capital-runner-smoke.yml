@@ -1,0 +1,61 @@
+name: Capital Runner Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/capital-runner-smoke.yml"
+
+jobs:
+  smoke:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+
+    steps:
+      - name: Show runner context
+        shell: powershell
+        run: |
+          Write-Host "Runner: $env:RUNNER_NAME"
+          Write-Host "Computer: $env:COMPUTERNAME"
+          Write-Host "Working directory: $(Get-Location)"
+
+      - name: Check Python
+        shell: powershell
+        run: |
+          python --version
+          where.exe python
+
+      - name: Check Capital API files
+        shell: powershell
+        run: |
+          $base = "C:\Capital\SKDLLPythonTester"
+          if (!(Test-Path $base)) { throw "Capital API folder not found: $base" }
+          $required = @(
+            "SKDLLPython.py",
+            "PythonTester.py",
+            "PythonTesterUI.py",
+            "libs\SKCOM.dll",
+            "capital_bridge.py"
+          )
+          foreach ($item in $required) {
+            $path = Join-Path $base $item
+            if (Test-Path $path) {
+              Write-Host "PASS $item"
+            } else {
+              Write-Host "MISSING $item"
+              if ($item -ne "capital_bridge.py") { throw "Required file missing: $path" }
+            }
+          }
+
+      - name: Import SKDLLPython
+        shell: powershell
+        run: |
+          Set-Location "C:\Capital\SKDLLPythonTester"
+          python -c "from SKDLLPython import SK; print('SKDLL LOAD OK')"
+
+      - name: Check local Capital credentials are present
+        shell: powershell
+        run: |
+          if ($env:CAPITAL_USER_ID) { Write-Host "PASS CAPITAL_USER_ID is set" } else { Write-Host "WARN CAPITAL_USER_ID is not set for the runner process" }
+          if ($env:CAPITAL_PASSWORD) { Write-Host "PASS CAPITAL_PASSWORD is set" } else { Write-Host "WARN CAPITAL_PASSWORD is not set for the runner process" }
+          if ($env:CAPITAL_AUTHORITY) { Write-Host "PASS CAPITAL_AUTHORITY is set" } else { Write-Host "WARN CAPITAL_AUTHORITY is not set for the runner process" }
