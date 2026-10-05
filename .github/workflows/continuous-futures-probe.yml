@@ -1,0 +1,20 @@
+name: Capital Continuous Futures Probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/continuous_futures_probe.py"
+      - ".github/workflows/continuous-futures-probe.yml"
+
+jobs:
+  probe:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe continuous futures symbols
+        shell: powershell
+        run: |
+          $env:PYTHONIOENCODING = "utf-8"
+          python tools/continuous_futures_probe.py
