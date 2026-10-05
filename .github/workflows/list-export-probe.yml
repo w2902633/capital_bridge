@@ -1,0 +1,15 @@
+name: Capital List Export Probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/list_export_probe.py"
+      - ".github/workflows/list-export-probe.yml"
+jobs:
+  probe:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - shell: powershell
+        run: python tools/list_export_probe.py
