@@ -58,9 +58,9 @@ for m in [2,3,7,13]:
         raw=p.RawData()
         print("[STOCKLIST]",m,"len",len(raw),"head",repr(raw[:300]),flush=True)
         hits=[]
-        for needle in ["TX00","MTX00","PBF","QEF","OWF","LXF","QFF","國巨","環球晶"]:
+        for needle in ["TX00","MTX00","TMF","PBF","QEF","OWF","LXF","QFF","國巨","環球晶"]:
             if needle in raw: hits.append(needle)
-        print("[STOCKLIST_HITS]",m,hits,flush=True)
+        print("[STOCKLIST_HITS]",m,hits,flush=True)\n        if "TMF" in raw:\n            p0=raw.find("TMF")\n            print("[TMF_CONTEXT]",repr(raw[max(0,p0-120):p0+500]),flush=True)
     except Exception as e:
         print("[STOCKLIST_EXC]",m,type(e).__name__,repr(e),flush=True)
 
