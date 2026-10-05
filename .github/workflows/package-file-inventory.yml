@@ -1,0 +1,17 @@
+name: Capital Package File Inventory
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/package_file_inventory.py"
+      - ".github/workflows/package-file-inventory.yml"
+jobs:
+  scan:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - shell: powershell
+        run: |
+          $env:PYTHONIOENCODING = "utf-8"
+          python tools/package_file_inventory.py
