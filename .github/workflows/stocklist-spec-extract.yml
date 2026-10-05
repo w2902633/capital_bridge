@@ -1,0 +1,17 @@
+name: Capital StockList Spec Extract
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/stocklist_spec_extract.py"
+      - ".github/workflows/stocklist-spec-extract.yml"
+jobs:
+  scan:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - shell: powershell
+        run: |
+          $env:PYTHONIOENCODING = "utf-8"
+          python tools/stocklist_spec_extract.py
