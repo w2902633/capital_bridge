@@ -1,0 +1,22 @@
+name: Capital Market Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/capital_market_diagnostic.py"
+      - ".github/workflows/capital-market-diagnostic.yml"
+
+jobs:
+  diagnostic:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run read-only market diagnostic
+        shell: powershell
+        run: |
+          python tools/capital_market_diagnostic.py
