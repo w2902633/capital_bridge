@@ -1,0 +1,17 @@
+name: Capital Futures Consent Probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/futures_consent_probe.py"
+      - ".github/workflows/futures-consent-probe.yml"
+jobs:
+  probe:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - shell: powershell
+        run: |
+          $env:PYTHONIOENCODING = "utf-8"
+          python tools/futures_consent_probe.py
