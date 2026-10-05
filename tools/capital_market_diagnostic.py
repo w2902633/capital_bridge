@@ -67,9 +67,9 @@ if not USER or not PASSWORD:
     raise SystemExit("Missing CAPITAL_USER_ID or CAPITAL_PASSWORD in runner environment")
 
 login = SK.Login(USER, PASSWORD, AUTHORITY)
-print("[Login]", msg(login.code))
-if login.code != 0:
-    raise SystemExit(login.code)
+print("[Login]", msg(login.Code))
+if login.Code != 0:
+    raise SystemExit(login.Code)
 
 code = SK.ManageServerConnection(USER, 0, 1)
 print("[Domestic quote connection]", msg(code))
