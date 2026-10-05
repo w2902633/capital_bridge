@@ -1,0 +1,18 @@
+name: Capital Official Doc Code Scan
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/official_doc_code_scan.py"
+      - ".github/workflows/official-doc-code-scan.yml"
+jobs:
+  scan:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract futures code examples from official 2.13.58 doc
+        shell: powershell
+        run: |
+          $env:PYTHONIOENCODING = "utf-8"
+          python tools/official_doc_code_scan.py
