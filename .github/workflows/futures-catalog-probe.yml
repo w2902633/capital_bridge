@@ -1,0 +1,21 @@
+name: Capital Futures Catalog Probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/futures_catalog_probe.py"
+      - ".github/workflows/futures-catalog-probe.yml"
+
+jobs:
+  probe:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Probe Capital futures catalog read-only
+        shell: powershell
+        run: |
+          $env:PYTHONIOENCODING = "utf-8"
+          python tools/futures_catalog_probe.py
