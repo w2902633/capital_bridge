@@ -86,7 +86,15 @@ try:
 except Exception as e:
     print("[YAOHUA_SEARCH_EXC]",repr(e),flush=True)
 
-symbols=yaohua_codes[:8]
+# Prefer the outright nearby contract, not calendar spreads.
+symbols=[]
+for code in yaohua_codes:
+    if "/" not in code and code=="VBF00":
+        symbols.append(code)
+for code in yaohua_codes:
+    if "/" not in code and code!="VBF00":
+        symbols.append(code)
+symbols=symbols[:4]
 print("[YAOHUA_CODES]",symbols,flush=True)
 results=[]
 def req(item,sym):
