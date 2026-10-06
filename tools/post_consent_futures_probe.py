@@ -87,8 +87,31 @@ except Exception as e:
     print("[YAOHUA_SEARCH_EXC]",repr(e),flush=True)
 
 # Prefer the outright nearby contract, not calendar spreads.
-symbols=["VBF00"] if "VBF00" in yaohua_codes else []
+symbols=[]
 print("[YAOHUA_CODES]",symbols,flush=True)
+# Find Innolux nearby futures code.
+innolux_codes=[]
+try:
+    p=SK.RequestStockList(2)
+    raw=p.RawData()
+    for rec in raw.replace("\n",";").split(";"):
+        if "群創" in rec:
+            print("[INNOLUX_REC]",repr(rec),flush=True)
+            parts=rec.split(",")
+            if parts and parts[0]:
+                code=parts[0].split("%")[-1]
+                if code and code not in innolux_codes:
+                    innolux_codes.append(code)
+except Exception as e:
+    print("[INNOLUX_SEARCH_EXC]",repr(e),flush=True)
+
+symbols=[]
+if "VBF00" in yaohua_codes: symbols.append("VBF00")
+for code in innolux_codes:
+    if "/" not in code and (code.endswith("00") or code.endswith("0000")):
+        symbols.append(code)
+        break
+print("[FOCUS_SYMBOLS]",symbols,flush=True)
 results=[]
 def req(item,sym):
     try:
