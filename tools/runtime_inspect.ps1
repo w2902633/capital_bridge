@@ -35,3 +35,5 @@ try {
 } catch {
   Write-Host ("DAEMON_HEALTH=FALSE")
 }
+
+# verify persisted daemon
