@@ -8,3 +8,4 @@ Write-Host ("LOCAL_QUERY_MS=" + $sw.ElapsedMilliseconds)
 Write-Host ("HEALTH_OK=" + $h.ok)
 $q | ConvertTo-Json -Depth 6 -Compress
 $b | ConvertTo-Json -Depth 6 -Compress
+# post-hidden-launch validation
