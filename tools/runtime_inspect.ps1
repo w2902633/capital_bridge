@@ -37,3 +37,5 @@ try {
 }
 
 # verify persisted daemon
+
+# post-close runner verification 2
