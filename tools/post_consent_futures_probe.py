@@ -70,49 +70,33 @@ for m in [2,3,7,13]:
 
 time.sleep(1)
 
-# Find YaoHua futures quote codes from market 2 catalog.
-yaohua_codes=[]
-try:
-    p=SK.RequestStockList(2)
-    raw=p.RawData()
-    for rec in raw.replace("\\n",";").split(";"):
-        if "燿華" in rec:
-            print("[YAOHUA_REC]",repr(rec),flush=True)
-            parts=rec.split(",")
-            if parts and parts[0]:
-                code=parts[0].split("%")[-1]
-                if code and code not in yaohua_codes:
-                    yaohua_codes.append(code)
-except Exception as e:
-    print("[YAOHUA_SEARCH_EXC]",repr(e),flush=True)
+# Portfolio + watchlist probe
+future_symbols=["PBF00","DQF00","VBF00","QEF00"]
+stock_symbols=["2344","3036","6024","70909","2454","2330","2303"]
 
-# Prefer the outright nearby contract, not calendar spreads.
-symbols=[]
-print("[YAOHUA_CODES]",symbols,flush=True)
-# Find Innolux nearby futures code.
-innolux_codes=[]
+# Find UMC nearby futures code from market 2 catalog.
 try:
     p=SK.RequestStockList(2)
     raw=p.RawData()
+    umc=[]
     for rec in raw.replace("\n",";").split(";"):
-        if "群創" in rec:
-            print("[INNOLUX_REC]",repr(rec),flush=True)
+        if "聯電" in rec:
+            print("[UMC_FUT_REC]",repr(rec),flush=True)
             parts=rec.split(",")
             if parts and parts[0]:
                 code=parts[0].split("%")[-1]
-                if code and code not in innolux_codes:
-                    innolux_codes.append(code)
+                if "/" not in code and code not in umc:
+                    umc.append(code)
+    for code in umc:
+        if code.endswith("00") or code.endswith("0000"):
+            future_symbols.append(code)
+            break
 except Exception as e:
-    print("[INNOLUX_SEARCH_EXC]",repr(e),flush=True)
+    print("[UMC_FUT_SEARCH_EXC]",repr(e),flush=True)
 
-symbols=[]
-if "VBF00" in yaohua_codes: symbols.append("VBF00")
-for code in innolux_codes:
-    if "/" not in code and (code.endswith("00") or code.endswith("0000")):
-        symbols.append(code)
-        break
-symbols.append("QEF00")
+symbols=future_symbols+stock_symbols
 print("[FOCUS_SYMBOLS]",symbols,flush=True)
+
 results=[]
 def req(item,sym):
     try:
