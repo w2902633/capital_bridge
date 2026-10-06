@@ -87,14 +87,7 @@ except Exception as e:
     print("[YAOHUA_SEARCH_EXC]",repr(e),flush=True)
 
 # Prefer the outright nearby contract, not calendar spreads.
-symbols=[]
-for code in yaohua_codes:
-    if "/" not in code and code=="VBF00":
-        symbols.append(code)
-for code in yaohua_codes:
-    if "/" not in code and code!="VBF00":
-        symbols.append(code)
-symbols=symbols[:4]
+symbols=["VBF00"] if "VBF00" in yaohua_codes else []
 print("[YAOHUA_CODES]",symbols,flush=True)
 results=[]
 def req(item,sym):
@@ -110,7 +103,7 @@ def req(item,sym):
         b=None; print("[REQ_TICKS_EXC]",item,sym,repr(e),flush=True)
     results.append((item,sym,a,b))
 
-for i,sym in enumerate(symbols):
+for i,sym in enumerate(symbols, start=1):
     t=threading.Thread(target=req,args=(i,sym))
     t.start(); t.join()
     time.sleep(1.0)
