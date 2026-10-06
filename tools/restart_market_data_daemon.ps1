@@ -18,3 +18,5 @@ Write-Host ("PRIMARY_COUNT="+$s.primary_tick_symbols.Count)
 Write-Host ("WATCH="+($s.watch_symbols -join ","))
 
 # retry after SKCOM reconnect hardening
+
+# load Best5 depth and flow metrics
