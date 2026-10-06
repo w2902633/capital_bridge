@@ -19,6 +19,26 @@ SYMBOLS=[x.strip() for x in os.environ.get(
     "PBF00,QEF00,DQF00,VBF00,CCF00,TM0000"
 ).split(",") if x.strip()]
 DB_PATH=os.environ.get("CAPITAL_BRIDGE_DB", os.path.join(BASE,"capital_market_data.sqlite3"))
+REPO_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REGISTRY_PATH=os.path.join(REPO_DIR,"config","discussed_symbols.json")
+
+def load_registry():
+    try:
+        with open(REGISTRY_PATH,"r",encoding="utf-8") as fh:
+            cfg=json.load(fh)
+    except Exception:
+        cfg={"primary_tick_symbols":[],"discussed_watchlist":[]}
+    primary=[x["symbol"] for x in cfg.get("primary_tick_symbols",[]) if x.get("symbol")]
+    watch=[x["symbol"] for x in cfg.get("discussed_watchlist",[]) if x.get("symbol")]
+    meta={}
+    for x in cfg.get("primary_tick_symbols",[])+cfg.get("discussed_watchlist",[]):
+        if x.get("symbol"): meta[x["symbol"]]=x
+    return primary,watch,meta
+
+PRIMARY_SYMBOLS,WATCH_SYMBOLS,SYMBOL_META=load_registry()
+if not PRIMARY_SYMBOLS:
+    PRIMARY_SYMBOLS=SYMBOLS
+ALL_SYMBOLS=list(dict.fromkeys(PRIMARY_SYMBOLS+WATCH_SYMBOLS))
 
 ready=threading.Event()
 stop_evt=threading.Event()
@@ -68,6 +88,44 @@ def on_conn(uid,code):
     if "STOCKS_READY" in safe_msg(code):
         ready.set()
 
+def stock_scale(st):
+    try:
+        d=int(st.nDecimal)
+        return 10.0**d if d>=0 else 100.0
+    except Exception:
+        return 100.0
+
+def on_quote(market,symbol):
+    try:
+        st=SK.SKQuoteLib_GetStockByStockNo(market,symbol)
+        if getattr(st,"nCode",-1)!=0:
+            return
+        scale=stock_scale(st)
+        q={
+            "symbol":symbol,
+            "market":market,
+            "date":getattr(st,"nTradingDay",0),
+            "time":getattr(st,"nDealTime",0),
+            "bid":getattr(st,"nBid",0)/scale,
+            "ask":getattr(st,"nAsk",0)/scale,
+            "last":getattr(st,"nClose",0)/scale,
+            "open":getattr(st,"nOpen",0)/scale,
+            "high":getattr(st,"nHigh",0)/scale,
+            "low":getattr(st,"nLow",0)/scale,
+            "ref":getattr(st,"nRef",0)/scale,
+            "total_qty":getattr(st,"nTQty",0),
+            "simulate":getattr(st,"nSimulate",0),
+            "received_at":time.time(),
+            "source":"quote"
+        }
+        with lock:
+            old=quotes.get(symbol)
+            # Do not overwrite a fresher tick snapshot with a quote snapshot.
+            if old is None or old.get("source")!="tick" or q["received_at"]-old.get("received_at",0)>2:
+                quotes[symbol]=q
+    except Exception:
+        return
+
 def on_tick(market,symbol,ptr,date,time_hms,time_micro,bid,ask,close,qty,simulate):
     try:
         ds=str(date)
@@ -86,7 +144,8 @@ def on_tick(market,symbol,ptr,date,time_hms,time_micro,bid,ask,close,qty,simulat
         "last":px(close),
         "qty":qty,
         "simulate":simulate,
-        "received_at":time.time()
+        "received_at":time.time(),
+        "source":"tick"
     }
     with lock:
         quotes[symbol]=q
@@ -131,7 +190,9 @@ def snapshot():
             "ok":True,
             "uptime_sec":round(now-started_at,1),
             "ready":ready.is_set(),
-            "symbols":SYMBOLS,
+            "symbols":ALL_SYMBOLS,
+            "primary_tick_symbols":PRIMARY_SYMBOLS,
+            "watch_symbols":WATCH_SYMBOLS,
             "quotes":quotes.copy()
         }
 
@@ -151,6 +212,8 @@ class Handler(BaseHTTPRequestHandler):
         parts=[p for p in u.path.split("/") if p]
         if u.path=="/health":
             self.sendj(snapshot()); return
+        if u.path=="/symbols":
+            self.sendj({"ok":True,"primary_tick_symbols":PRIMARY_SYMBOLS,"watch_symbols":WATCH_SYMBOLS,"meta":SYMBOL_META}); return
         if len(parts)==2 and parts[0]=="quote":
             sym=parts[1].upper()
             with lock: q=quotes.get(sym)
@@ -183,6 +246,7 @@ def subscribe():
     SK.OnReplyMessage(on_reply)
     SK.OnConnection(on_conn)
     SK.OnNotifyTicksLONG(on_tick)
+    SK.OnNotifyQuoteLONG(on_quote)
     login=SK.Login(USER,PASSWORD,AUTH)
     if login.Code!=0:
         raise RuntimeError("login_failed:"+safe_msg(login.Code))
@@ -194,14 +258,22 @@ def subscribe():
     SK.LoadCommodity(2)
     time.sleep(0.5)
     item=1
-    for sym in SYMBOLS:
+    for sym in PRIMARY_SYMBOLS:
         rc=SK.SKQuoteLib_RequestTicks(item,sym)
         if rc==3027:
             item+=1
             rc=SK.SKQuoteLib_RequestTicks(item,sym)
         item+=1
-        # No credentials/account identifiers are logged.
-        print(json.dumps({"event":"subscribe","symbol":sym,"code":rc,"message":safe_msg(rc)},ensure_ascii=True),flush=True)
+        print(json.dumps({"event":"tick_subscribe","symbol":sym,"code":rc,"message":safe_msg(rc)},ensure_ascii=True),flush=True)
+
+    # Subscribe all discussed instruments to lightweight quote updates.
+    # This avoids consuming scarce RequestTicks pages for the long watchlist.
+    for sym in ALL_SYMBOLS:
+        try:
+            rc=SK.SKQuoteLib_RequestStocks(sym)
+            print(json.dumps({"event":"quote_subscribe","symbol":sym,"code":rc,"message":safe_msg(rc)},ensure_ascii=True),flush=True)
+        except Exception as e:
+            print(json.dumps({"event":"quote_subscribe","symbol":sym,"error":type(e).__name__},ensure_ascii=True),flush=True)
 
 def main():
     init_db()
