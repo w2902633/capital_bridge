@@ -16,3 +16,5 @@ Write-Host ("HEALTH_OK="+$h.ok)
 Write-Host ("SYMBOL_COUNT="+$s.watch_symbols.Count)
 Write-Host ("PRIMARY_COUNT="+$s.primary_tick_symbols.Count)
 Write-Host ("WATCH="+($s.watch_symbols -join ","))
+
+# retry after SKCOM reconnect hardening
