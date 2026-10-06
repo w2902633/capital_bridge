@@ -26,3 +26,4 @@ jobs:
           Write-Host ("QEF_5M=" + ($qef | ConvertTo-Json -Depth 6 -Compress))
           Write-Host ("DQF_5M=" + ($dqf | ConvertTo-Json -Depth 6 -Compress))
           Write-Host ("VBF_5M=" + ($vbf | ConvertTo-Json -Depth 6 -Compress))
+          Write-Host "FIVE_SYMBOL_REVIEW"
