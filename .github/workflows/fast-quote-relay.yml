@@ -1,0 +1,28 @@
+name: Capital Fast Quote Relay
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/fast-quote-relay.yml"
+jobs:
+  quote:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 1
+    steps:
+      - name: Read local market cache
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $sw=[System.Diagnostics.Stopwatch]::StartNew()
+          $q=Invoke-RestMethod -Uri "http://127.0.0.1:8877/quotes?symbols=PBF00,QEF00,DQF00,VBF00,CCF00,TM0000" -TimeoutSec 3
+          $pbf=Invoke-RestMethod -Uri "http://127.0.0.1:8877/bars/PBF00?tf=5m&limit=12" -TimeoutSec 3
+          $qef=Invoke-RestMethod -Uri "http://127.0.0.1:8877/bars/QEF00?tf=5m&limit=12" -TimeoutSec 3
+          $dqf=Invoke-RestMethod -Uri "http://127.0.0.1:8877/bars/DQF00?tf=5m&limit=12" -TimeoutSec 3
+          $vbf=Invoke-RestMethod -Uri "http://127.0.0.1:8877/bars/VBF00?tf=5m&limit=12" -TimeoutSec 3
+          $sw.Stop()
+          Write-Host ("CACHE_QUERY_MS=" + $sw.ElapsedMilliseconds)
+          Write-Host ("QUOTES=" + ($q | ConvertTo-Json -Depth 6 -Compress))
+          Write-Host ("PBF_5M=" + ($pbf | ConvertTo-Json -Depth 6 -Compress))
+          Write-Host ("QEF_5M=" + ($qef | ConvertTo-Json -Depth 6 -Compress))
+          Write-Host ("DQF_5M=" + ($dqf | ConvertTo-Json -Depth 6 -Compress))
+          Write-Host ("VBF_5M=" + ($vbf | ConvertTo-Json -Depth 6 -Compress))
