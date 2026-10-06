@@ -1,0 +1,15 @@
+name: Capital Daemon Diagnose
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/daemon_diagnose.ps1"
+      - ".github/workflows/daemon-diagnose.yml"
+jobs:
+  diagnose:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File tools/daemon_diagnose.ps1
