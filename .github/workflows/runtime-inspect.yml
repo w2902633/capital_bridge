@@ -1,0 +1,16 @@
+name: Capital Runtime Inspect
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/runtime_inspect.ps1"
+      - ".github/workflows/runtime-inspect.yml"
+jobs:
+  inspect:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect runner and daemon
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File tools/runtime_inspect.ps1
