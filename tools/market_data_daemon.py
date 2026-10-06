@@ -10,7 +10,7 @@ if BASE not in sys.path:
 from SKDLLPython import SK
 
 HOST="127.0.0.1"
-PORT=int(os.environ.get("CAPITAL_BRIDGE_PORT","8765"))
+PORT=int(os.environ.get("CAPITAL_BRIDGE_PORT","8877"))
 USER=os.environ.get("CAPITAL_USER_ID","")
 PASSWORD=os.environ.get("CAPITAL_PASSWORD","")
 AUTH=int(os.environ.get("CAPITAL_AUTHORITY","0"))
