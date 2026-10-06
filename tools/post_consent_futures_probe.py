@@ -111,6 +111,7 @@ for code in innolux_codes:
     if "/" not in code and (code.endswith("00") or code.endswith("0000")):
         symbols.append(code)
         break
+symbols.append("QEF00")
 print("[FOCUS_SYMBOLS]",symbols,flush=True)
 results=[]
 def req(item,sym):
