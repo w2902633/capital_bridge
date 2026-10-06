@@ -70,7 +70,24 @@ for m in [2,3,7,13]:
 
 time.sleep(1)
 
-symbols=["TX00","TM0000","PBF00","QEF00","QFF00","OWF00","LXF00","6488"]
+# Find YaoHua futures quote codes from market 2 catalog.
+yaohua_codes=[]
+try:
+    p=SK.RequestStockList(2)
+    raw=p.RawData()
+    for rec in raw.replace("\\n",";").split(";"):
+        if "燿華" in rec:
+            print("[YAOHUA_REC]",repr(rec),flush=True)
+            parts=rec.split(",")
+            if parts and parts[0]:
+                code=parts[0].split("%")[-1]
+                if code and code not in yaohua_codes:
+                    yaohua_codes.append(code)
+except Exception as e:
+    print("[YAOHUA_SEARCH_EXC]",repr(e),flush=True)
+
+symbols=yaohua_codes[:8]
+print("[YAOHUA_CODES]",symbols,flush=True)
 results=[]
 def req(item,sym):
     try:
