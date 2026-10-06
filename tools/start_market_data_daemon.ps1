@@ -22,6 +22,7 @@ if (Test-Path $pidFile) {
   }
 }
 
+$env:RUNNER_TRACKING_ID = ""
 $proc = Start-Process -FilePath "python" -ArgumentList @($script) -WorkingDirectory $base -WindowStyle Hidden -RedirectStandardOutput $logFile -RedirectStandardError ($logFile + ".err") -PassThru
 Set-Content -Path $pidFile -Value $proc.Id
 Start-Sleep -Seconds 8
