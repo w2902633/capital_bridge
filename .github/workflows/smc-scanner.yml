@@ -1,0 +1,15 @@
+name: Capital SMC Scanner
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/smc_scanner_snapshot.ps1"
+      - ".github/workflows/smc-scanner.yml"
+jobs:
+  scan:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File tools/smc_scanner_snapshot.ps1
