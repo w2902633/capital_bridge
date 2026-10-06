@@ -1,0 +1,21 @@
+name: Capital Market Data Daemon
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/market_data_daemon.py"
+      - "tools/start_market_data_daemon.ps1"
+      - "tools/check_market_data_daemon.ps1"
+      - ".github/workflows/market-data-daemon.yml"
+jobs:
+  start-and-check:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start or verify daemon
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File tools/start_market_data_daemon.ps1
+      - name: Measure local API
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File tools/check_market_data_daemon.ps1
