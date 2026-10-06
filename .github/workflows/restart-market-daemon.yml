@@ -1,0 +1,16 @@
+name: Capital Restart Market Daemon
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/restart_market_data_daemon.ps1"
+      - ".github/workflows/restart-market-daemon.yml"
+jobs:
+  restart:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restart daemon
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File tools/restart_market_data_daemon.ps1
