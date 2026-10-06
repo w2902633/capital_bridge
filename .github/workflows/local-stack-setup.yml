@@ -1,0 +1,17 @@
+name: Capital Local Stack Setup
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/bootstrap_local_stack.ps1"
+      - "tools/start_local_stack.ps1"
+      - ".github/workflows/local-stack-setup.yml"
+jobs:
+  setup:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure encrypted credentials and hidden autostart
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File tools/bootstrap_local_stack.ps1
