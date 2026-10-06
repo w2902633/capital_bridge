@@ -11,7 +11,7 @@ if (Test-Path $pidFile) {
     $p = Get-Process -Id $oldPid -ErrorAction SilentlyContinue
     if ($p) {
       try {
-        $h = Invoke-RestMethod -Uri "http://127.0.0.1:8765/health" -TimeoutSec 2
+        $h = Invoke-RestMethod -Uri "http://127.0.0.1:8877/health" -TimeoutSec 2
         if ($h.ok) {
           Write-Host "daemon already healthy"
           exit 0
@@ -25,6 +25,6 @@ if (Test-Path $pidFile) {
 $proc = Start-Process -FilePath "python" -ArgumentList @($script) -WorkingDirectory $base -WindowStyle Hidden -RedirectStandardOutput $logFile -RedirectStandardError ($logFile + ".err") -PassThru
 Set-Content -Path $pidFile -Value $proc.Id
 Start-Sleep -Seconds 8
-$health = Invoke-RestMethod -Uri "http://127.0.0.1:8765/health" -TimeoutSec 5
+$health = Invoke-RestMethod -Uri "http://127.0.0.1:8877/health" -TimeoutSec 5
 if (-not $health.ok) { throw "daemon failed health check" }
 Write-Host ("daemon healthy; symbols=" + ($health.symbols -join ","))
