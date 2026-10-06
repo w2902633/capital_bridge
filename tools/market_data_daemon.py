@@ -44,6 +44,8 @@ ready=threading.Event()
 stop_evt=threading.Event()
 lock=threading.RLock()
 quotes={}
+depth={}
+flow=defaultdict(lambda: {"buy_qty":0,"sell_qty":0,"neutral_qty":0,"cvd":0,"ticks":0})
 ticks=defaultdict(lambda: deque(maxlen=50000))
 bars=defaultdict(lambda: defaultdict(dict))
 started_at=time.time()
@@ -126,6 +128,21 @@ def on_quote(market,symbol):
     except Exception:
         return
 
+def on_best5(market,symbol,bids,bid_qtys,asks,ask_qtys,extend_bid,extend_bid_qty,extend_ask,extend_ask_qty,simulate):
+    scale=100.0
+    try:
+        st=SK.SKQuoteLib_GetStockByStockNo(market,symbol)
+        scale=stock_scale(st)
+    except Exception:
+        pass
+    with lock:
+        depth[symbol]={
+            "symbol":symbol,"market":market,
+            "bids":[{"p":p/scale,"q":q} for p,q in zip(bids,bid_qtys)],
+            "asks":[{"p":p/scale,"q":q} for p,q in zip(asks,ask_qtys)],
+            "received_at":time.time(),"simulate":simulate
+        }
+
 def on_tick(market,symbol,ptr,date,time_hms,time_micro,bid,ask,close,qty,simulate):
     try:
         ds=str(date)
@@ -150,8 +167,18 @@ def on_tick(market,symbol,ptr,date,time_hms,time_micro,bid,ask,close,qty,simulat
     with lock:
         quotes[symbol]=q
         ticks[symbol].append(q)
+        f=flow[symbol]
+        tq=qty or 0
+        if ask and close>=ask:
+            f["buy_qty"]+=tq; f["cvd"]+=tq
+        elif bid and close<=bid:
+            f["sell_qty"]+=tq; f["cvd"]-=tq
+        else:
+            f["neutral_qty"]+=tq
+        f["ticks"]+=1
+        f["received_at"]=q["received_at"]
         if q["last"] is not None:
-            update_bars(symbol,epoch,q["last"],qty or 0)
+            update_bars(symbol,epoch,q["last"],tq)
 
 def init_db():
     con=sqlite3.connect(DB_PATH)
@@ -214,6 +241,14 @@ class Handler(BaseHTTPRequestHandler):
             self.sendj(snapshot()); return
         if u.path=="/symbols":
             self.sendj({"ok":True,"primary_tick_symbols":PRIMARY_SYMBOLS,"watch_symbols":WATCH_SYMBOLS,"meta":SYMBOL_META}); return
+        if len(parts)==2 and parts[0]=="depth":
+            sym=parts[1].upper()
+            with lock:
+                d=depth.get(sym); f=dict(flow.get(sym,{}))
+            if not d:
+                self.sendj({"ok":False,"error":"depth_not_ready","symbol":sym},404); return
+            out=dict(d); out["age_ms"]=int((time.time()-d["received_at"])*1000)
+            self.sendj({"ok":True,"depth":out,"flow":f}); return
         if len(parts)==2 and parts[0]=="quote":
             sym=parts[1].upper()
             with lock: q=quotes.get(sym)
@@ -247,6 +282,7 @@ def subscribe():
     SK.OnConnection(on_conn)
     SK.OnNotifyTicksLONG(on_tick)
     SK.OnNotifyQuoteLONG(on_quote)
+    SK.OnNotifyBest5LONG(on_best5)
     login=SK.Login(USER,PASSWORD,AUTH)
     if login.Code!=0:
         raise RuntimeError("login_failed:"+safe_msg(login.Code))
