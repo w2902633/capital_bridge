@@ -254,7 +254,21 @@ def subscribe():
     if rc!=0:
         raise RuntimeError("connect_failed:"+safe_msg(rc))
     if not ready.wait(20):
-        raise RuntimeError("stocks_ready_timeout")
+        # SKCOM can retain a short-lived previous session after a process restart.
+        # Retry the domestic quote connection instead of killing the daemon.
+        for attempt in range(1,4):
+            try:
+                SK.ManageServerConnection(USER,0,0)
+            except Exception:
+                pass
+            time.sleep(2*attempt)
+            ready.clear()
+            rc=SK.ManageServerConnection(USER,0,1)
+            print(json.dumps({"event":"connect_retry","attempt":attempt,"code":rc,"message":safe_msg(rc)},ensure_ascii=True),flush=True)
+            if rc==0 and ready.wait(15):
+                break
+        if not ready.is_set():
+            raise RuntimeError("stocks_ready_timeout_after_retries")
     SK.LoadCommodity(2)
     time.sleep(0.5)
     item=1
