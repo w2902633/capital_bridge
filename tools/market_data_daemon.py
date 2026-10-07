@@ -201,7 +201,7 @@ def persist_loop():
                 if last_seen.get(sym)==marker:
                     continue
                 last_seen[sym]=marker
-                rows.append((sym,q["received_at"],q["market"],q["date"],q["time"],q["bid"],q["ask"],q["last"],q["qty"],q["simulate"]))
+                rows.append((sym,q.get("received_at"),q.get("market"),q.get("date"),q.get("time"),q.get("bid"),q.get("ask"),q.get("last"),q.get("qty",q.get("total_qty",0)),q.get("simulate",0)))
         if rows:
             try:
                 con=sqlite3.connect(DB_PATH)
