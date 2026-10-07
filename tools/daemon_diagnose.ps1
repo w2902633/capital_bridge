@@ -9,3 +9,7 @@ foreach($f in $files){
     Write-Host "MISSING"
   }
 }
+
+Write-Host "SPOT_TICK_SUBSCRIPTIONS"
+$lp=Join-Path $base "capital_market_data.log"
+if(Test-Path $lp){ Select-String -Path $lp -Pattern "spot_tick_subscribe" | Select-Object -Last 20 | ForEach-Object { Write-Host $_.Line } }
