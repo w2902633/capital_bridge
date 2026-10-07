@@ -39,6 +39,7 @@ PRIMARY_SYMBOLS,WATCH_SYMBOLS,SYMBOL_META=load_registry()
 if not PRIMARY_SYMBOLS:
     PRIMARY_SYMBOLS=SYMBOLS
 ALL_SYMBOLS=list(dict.fromkeys(PRIMARY_SYMBOLS+WATCH_SYMBOLS))
+PAIR_SPOTS=["6488","2327","3481","2367","2303"]
 
 ready=threading.Event()
 stop_evt=threading.Event()
@@ -316,6 +317,16 @@ def subscribe():
         item+=1
         print(json.dumps({"event":"tick_subscribe","symbol":sym,"code":rc,"message":safe_msg(rc)},ensure_ascii=True),flush=True)
 
+    # Keep the five cash underlyings on tick subscriptions too, so futures basis
+    # comparisons use live spot prices rather than the initial RequestStocks snapshot.
+    for sym in PAIR_SPOTS:
+        rc=SK.SKQuoteLib_RequestTicks(item,sym)
+        if rc==3027:
+            item+=1
+            rc=SK.SKQuoteLib_RequestTicks(item,sym)
+        item+=1
+        print(json.dumps({"event":"spot_tick_subscribe","symbol":sym,"code":rc,"message":safe_msg(rc)},ensure_ascii=True),flush=True)
+
     # Subscribe all discussed instruments to lightweight quote updates.
     # This avoids consuming scarce RequestTicks pages for the long watchlist.
     for sym in ALL_SYMBOLS:
@@ -328,9 +339,8 @@ def subscribe():
 def quote_refresh_loop():
     # RequestStocks behaves as a snapshot in this bridge, so refresh the five
     # underlying cash stocks used for futures basis analysis during the session.
-    pair_spots=["6488","2327","3481","2367","2303"]
     while not stop_evt.is_set():
-        for sym in pair_spots:
+        for sym in PAIR_SPOTS:
             try:
                 SK.SKQuoteLib_RequestStocks(sym)
             except Exception:
