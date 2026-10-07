@@ -325,10 +325,23 @@ def subscribe():
         except Exception as e:
             print(json.dumps({"event":"quote_subscribe","symbol":sym,"error":type(e).__name__},ensure_ascii=True),flush=True)
 
+def quote_refresh_loop():
+    # RequestStocks behaves as a snapshot in this bridge, so refresh the five
+    # underlying cash stocks used for futures basis analysis during the session.
+    pair_spots=["6488","2327","3481","2367","2303"]
+    while not stop_evt.is_set():
+        for sym in pair_spots:
+            try:
+                SK.SKQuoteLib_RequestStocks(sym)
+            except Exception:
+                pass
+        stop_evt.wait(2.0)
+
 def main():
     init_db()
     subscribe()
     threading.Thread(target=persist_loop,daemon=True).start()
+    threading.Thread(target=quote_refresh_loop,daemon=True).start()
     server=ThreadingHTTPServer((HOST,PORT),Handler)
     print(json.dumps({"event":"ready","host":HOST,"port":PORT,"symbols":SYMBOLS},ensure_ascii=True),flush=True)
     try:
