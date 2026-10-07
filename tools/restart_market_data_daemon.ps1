@@ -20,3 +20,5 @@ Write-Host ("WATCH="+($s.watch_symbols -join ","))
 # retry after SKCOM reconnect hardening
 
 # load Best5 depth and flow metrics
+
+# morning session reconnect 2026-10-07
