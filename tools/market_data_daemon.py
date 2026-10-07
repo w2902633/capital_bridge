@@ -306,8 +306,10 @@ def subscribe():
                 break
         if not ready.is_set():
             raise RuntimeError("stocks_ready_timeout_after_retries")
+    SK.LoadCommodity(0)
+    SK.LoadCommodity(1)
     SK.LoadCommodity(2)
-    time.sleep(0.5)
+    time.sleep(0.8)
     item=1
     for sym in PRIMARY_SYMBOLS:
         rc=SK.SKQuoteLib_RequestTicks(item,sym)
