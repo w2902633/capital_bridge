@@ -22,3 +22,5 @@ Write-Host ("WATCH="+($s.watch_symbols -join ","))
 # load Best5 depth and flow metrics
 
 # morning session reconnect 2026-10-07
+
+# reload latest paired spot streaming
