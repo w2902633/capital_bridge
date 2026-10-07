@@ -14,7 +14,7 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $sw=[System.Diagnostics.Stopwatch]::StartNew()
-          $q=Invoke-RestMethod -Uri "http://127.0.0.1:8877/quotes?symbols=PBF00,QEF00,DQF00,VBF00,CCF00,TM0000" -TimeoutSec 3
+          $q=Invoke-RestMethod -Uri "http://127.0.0.1:8877/quotes?symbols=PBF00,QEF00,DQF00,VBF00,CCF00,TM0000,2344,3036,6024,709092" -TimeoutSec 3
           $pbf=Invoke-RestMethod -Uri "http://127.0.0.1:8877/bars/PBF00?tf=5m&limit=12" -TimeoutSec 3
           $qef=Invoke-RestMethod -Uri "http://127.0.0.1:8877/bars/QEF00?tf=5m&limit=12" -TimeoutSec 3
           $dqf=Invoke-RestMethod -Uri "http://127.0.0.1:8877/bars/DQF00?tf=5m&limit=12" -TimeoutSec 3
@@ -27,3 +27,9 @@ jobs:
           Write-Host ("DQF_5M=" + ($dqf | ConvertTo-Json -Depth 6 -Compress))
           Write-Host ("VBF_5M=" + ($vbf | ConvertTo-Json -Depth 6 -Compress))
           Write-Host "FIVE_SYMBOL_REVIEW"
+          $dqfd=Invoke-RestMethod -Uri "http://127.0.0.1:8877/depth/DQF00" -TimeoutSec 3
+          $vbfd=Invoke-RestMethod -Uri "http://127.0.0.1:8877/depth/VBF00" -TimeoutSec 3
+          $pbfd=Invoke-RestMethod -Uri "http://127.0.0.1:8877/depth/PBF00" -TimeoutSec 3
+          Write-Host ("DQF_DEPTH=" + ($dqfd | ConvertTo-Json -Depth 8 -Compress))
+          Write-Host ("VBF_DEPTH=" + ($vbfd | ConvertTo-Json -Depth 8 -Compress))
+          Write-Host ("PBF_DEPTH=" + ($pbfd | ConvertTo-Json -Depth 8 -Compress))
