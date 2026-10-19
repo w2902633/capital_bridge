@@ -39,7 +39,7 @@ PRIMARY_SYMBOLS,WATCH_SYMBOLS,SYMBOL_META=load_registry()
 if not PRIMARY_SYMBOLS:
     PRIMARY_SYMBOLS=SYMBOLS
 ALL_SYMBOLS=list(dict.fromkeys(PRIMARY_SYMBOLS+WATCH_SYMBOLS))
-PAIR_SPOTS=["6488","2327","3481","2367","2303"]
+PAIR_SPOTS=["6488","2327","3481","2367","2303","3706"]
 
 ready=threading.Event()
 stop_evt=threading.Event()
