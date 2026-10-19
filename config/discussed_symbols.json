@@ -50,6 +50,11 @@
       "symbol": "MTX00",
       "name": "小台指期",
       "type": "future"
+    },
+    {
+      "symbol": "PSF00",
+      "name": "神達期",
+      "type": "future"
     }
   ],
   "discussed_watchlist": [
@@ -221,6 +226,11 @@
     {
       "symbol": "3260",
       "name": "威剛",
+      "type": "stock"
+    },
+    {
+      "symbol": "3706",
+      "name": "神達",
       "type": "stock"
     }
   ]
