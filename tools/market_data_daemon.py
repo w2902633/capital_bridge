@@ -40,6 +40,7 @@ if not PRIMARY_SYMBOLS:
     PRIMARY_SYMBOLS=SYMBOLS
 ALL_SYMBOLS=list(dict.fromkeys(PRIMARY_SYMBOLS+WATCH_SYMBOLS))
 PAIR_SPOTS=["6488","2327","3481","2367","2303","3706"]
+PORTFOLIO_SPOTS=["2344","3036","6024","6239","709092"]
 
 ready=threading.Event()
 stop_evt=threading.Event()
@@ -342,7 +343,7 @@ def quote_refresh_loop():
     # RequestStocks behaves as a snapshot in this bridge, so refresh the five
     # underlying cash stocks used for futures basis analysis during the session.
     while not stop_evt.is_set():
-        for sym in PAIR_SPOTS:
+        for sym in list(dict.fromkeys(PAIR_SPOTS+PORTFOLIO_SPOTS)):
             try:
                 SK.SKQuoteLib_RequestStocks(sym)
             except Exception:
